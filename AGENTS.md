@@ -18,4 +18,3 @@ The last installed version used applicationId com.apylon26.fylo.app and launcher
 ## Reset scope
 
 The user authorized starting over including all old functions and data. The repository reset does not erase installed Android data or shared FYLO folders. Do not claim device data has been erased without actual device evidence. Preserve the old repository snapshot in backup/v0.7.0-before-reset-2026-10-31.
-
