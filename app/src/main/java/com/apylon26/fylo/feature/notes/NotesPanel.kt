@@ -114,7 +114,7 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
                             if (store.filesTree == null) folderPicker.launch(null) else filePicker.launch(arrayOf("*/*"))
                         }
                         NoteAction("−", "Zuordnung entfernen", !busy && selected != null && activeAttachment != null) {
-                            setAttachments(attachments.filterNot { it.uri == activeAttachment })
+                            setAttachments(planAttachmentRemoval(attachments, pendingDeletes, activeAttachment, false).attachments)
                             activeAttachment = null; notice = "Zuordnung entfernt. Zum Übernehmen speichern."
                         }
                         NoteAction("!", "Datei löschen", !busy && selected != null && activeAttachment != null) { deleteConfirmation = true }
@@ -192,11 +192,9 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
             title = { Text("Dateikopie löschen?") },
             text = { Text("Die ausgewählte Kopie in FYLO/Dateien wird beim Speichern endgültig gelöscht. Die ursprüngliche Quelldatei bleibt erhalten.") },
             confirmButton = { TextButton(onClick = {
-                val attachment = attachments.firstOrNull { it.uri == activeAttachment }
-                if (attachment != null) {
-                    pendingDeleteJson = NoteCodec.encode(listOf(Note(checkNotNull(selected), "", "", pendingDeletes + attachment)))
-                    setAttachments(attachments.filterNot { it.uri == attachment.uri })
-                }
+                val removal = planAttachmentRemoval(attachments, pendingDeletes, activeAttachment, true)
+                pendingDeleteJson = NoteCodec.encode(listOf(Note(checkNotNull(selected), "", "", removal.pendingDeletes)))
+                setAttachments(removal.attachments)
                 activeAttachment = null; deleteConfirmation = false; notice = "Löschen vorgemerkt. Zum Übernehmen speichern."
             }) { Text("Löschen vormerken") } },
             dismissButton = { TextButton(onClick = { deleteConfirmation = false }) { Text("Abbrechen") } })
