@@ -113,11 +113,11 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
                         NoteAction("+", "Datei hinzufügen", !busy && selected != null) {
                             if (store.filesTree == null) folderPicker.launch(null) else filePicker.launch(arrayOf("*/*"))
                         }
-                        NoteAction("−", "Zuordnung entfernen", !busy && activeAttachment != null) {
+                        NoteAction("−", "Zuordnung entfernen", !busy && selected != null && activeAttachment != null) {
                             setAttachments(attachments.filterNot { it.uri == activeAttachment })
                             activeAttachment = null; notice = "Zuordnung entfernt. Zum Übernehmen speichern."
                         }
-                        NoteAction("!", "Datei löschen", !busy && activeAttachment != null) { deleteConfirmation = true }
+                        NoteAction("!", "Datei löschen", !busy && selected != null && activeAttachment != null) { deleteConfirmation = true }
                         NoteAction("X", "Modul schließen", !busy) { close(true) }
                     }
                 }
