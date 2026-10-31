@@ -10,8 +10,8 @@ android {
         applicationId = "com.apylon26.fylo.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "0.1.0"
+        versionCode = 10
+        versionName = "0.1.1"
     }
     buildTypes { getByName("debug") { signingConfig = null } }
     buildFeatures { compose = true }

@@ -1,12 +1,13 @@
-# FYLO 0.1.0 – neuer Assistenz-Kern
+# FYLO 0.1.1 – neuer Assistenz-Kern
 
-Native Android-Basis in Kotlin und Jetpack Compose. Neu aufgebaut nach dem vollständigen Projektreset; keine alten Module oder Daten werden importiert. applicationId und Signaturschlüssel bleiben für kompatible Installation erhalten; die Versionsnummer startet neu bei 0.1.0, der technische versionCode steigt auf 9.
+Native Android-Basis in Kotlin und Jetpack Compose. Neu aufgebaut nach dem vollständigen Projektreset; keine alten Module oder Daten werden importiert. applicationId und Signaturschlüssel bleiben für kompatible Installation erhalten; die Versionsnummer startet neu bei 0.1.0; dieses Update ist 0.1.1 mit technischem versionCode 10.
 
 ## Startbildschirm
 
 - Analoge Uhr mit Stunden-, Minuten- und orangefarbenem Sekundenzeiger, jede Sekunde an die aktuelle Systemzeit angepasst.
-- Akkustand und Ladezustand aus Androids Batterieinformation.
-- CPU-Anzeige mit Minimum, aktuellem Wert, Maximum und Balken mit Extremwert-Markierungen. Gültige Messwerte aktualisieren sich jede Sekunde, während FYLO sichtbar ist. Die Uhr und das Sampling pausieren im Hintergrund.
+- Uhr mit halbem Durchmesser gegenüber 0.1.0. Datum, Akkustand und Ladezustand stehen rechts neben der Uhr.
+- Statusfenster unterhalb der Uhr als ausdrücklich gekennzeichneter Platzhalter für spätere Anwendungen und Funktionen.
+- CPU-Spinnennetz mit drei Achsen (Minimum, aktuell, Maximum), automatisch skalierter Messfläche, Min-Peak und Max-Peak. Der orange Indikator läuft in acht Sekunden innerhalb des Dreiecks um; seine Entfernung zur Mitte richtet sich nach der aktuellen Auslastung. Die Rotation ist eine Darstellungsanimation und kein weiterer Messwert. Bei 0 % bleibt er in der Mitte. Die Messfläche und Zahlen zeigen die echten Messwerte. Gültige Messwerte aktualisieren sich jede Sekunde, während FYLO sichtbar ist. Die Uhr und das Sampling pausieren im Hintergrund.
 - Blaues rundes Zahnrad mit orangefarbenem Symbol oben rechts öffnet ein scrollbar angelegtes Einstellungen-Popup.
 
 Die CPU-Quelle ist beschriftet: `CPU · Gerät`, wenn Android das Lesen von /proc/stat erlaubt; sonst `CPU · FYLO`, gemessen über Process.getElapsedCpuTime und normiert auf alle verfügbaren Prozessorkerne. Kein erfundener Gerätewert. Minimum/Maximum gelten für den laufenden App-Prozess und dieselbe Quelle. Ungültige Messungen erscheinen als Strich. Bei einem Quellenwechsel werden die Extremwerte zurückgesetzt.

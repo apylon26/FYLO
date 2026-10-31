@@ -1,7 +1,7 @@
 # FYLO development instructions
 
 FYLO is being rebuilt from zero for Andreas. User-facing text is German.
-The current rebuilt version is 0.1.0. It contains an analog clock, battery and CPU monitoring, a settings popup and external APK module installation/discovery. No AI model or previous modules are bundled. Do not claim planned capabilities are implemented.
+The current rebuilt version is 0.1.1. It contains a compact analog clock, date and battery alongside it, a status placeholder and animated three-axis CPU radar monitoring, a settings popup and external APK module installation/discovery. No AI model or previous modules are bundled. Do not claim planned capabilities are implemented.
 Use Kotlin and Jetpack Compose when rebuilding the native Android app. Agree new features from the ongoing user instructions; do not automatically restore the previous UI or modules.
 Use the agreed icon style: classic blue circle, orange symbol, subtle 3D effect, transparent background, consistent proportions and lighting.
 Never commit credentials or signing keys. Keep future build dependencies pinned.

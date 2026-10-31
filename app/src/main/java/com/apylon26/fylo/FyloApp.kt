@@ -43,10 +43,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val Navy = Color(0xFF06132B)
-private val Blue = Color(0xFF147DE1)
-private val Orange = Color(0xFFFF9800)
-private val Pale = Color(0xFFB9CDE8)
+internal val Navy = Color(0xFF06132B)
+internal val Blue = Color(0xFF147DE1)
+internal val Orange = Color(0xFFFF9800)
+internal val Pale = Color(0xFFB9CDE8)
 
 @Composable
 fun FyloApp(visible: Boolean, refresh: Int) {
@@ -66,19 +66,34 @@ fun FyloApp(visible: Boolean, refresh: Int) {
         Surface(color = Navy) {
             BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF10396C), Navy)))
                 .windowInsetsPadding(WindowInsets.safeDrawing)) {
-                val clockSize = minOf(maxWidth - 48.dp, maxHeight * 0.44f, 360.dp)
+                val clockSize = minOf(maxWidth - 48.dp, maxHeight * 0.44f, 360.dp) / 2
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     Row(Modifier.fillMaxWidth().height(72.dp), horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically) {
                         RoundButton("⚙", "Einstellungen öffnen") { settings = true }
                     }
-                    Spacer(Modifier.height(20.dp))
-                    AnalogClock(now, Modifier.size(clockSize))
-                    Spacer(Modifier.height(28.dp))
-                    BatteryCard(reading)
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        AnalogClock(now, Modifier.size(clockSize))
+                        Spacer(Modifier.width(20.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(now.format(DateTimeFormatter.ofPattern("EEEE", Locale.GERMAN)), color = Pale, fontSize = 16.sp)
+                            Text(now.format(DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN)), fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                            Spacer(Modifier.height(18.dp))
+                            Text(if (reading.charging) "Akku · lädt" else "Akku", color = Pale, fontSize = 14.sp)
+                            Text(reading.battery?.let { "$it %" } ?: "—", color = Orange, fontSize = 28.sp)
+                        }
+                    }
                     Spacer(Modifier.height(18.dp))
-                    CpuCard(reading)
+                    Surface(shape = RoundedCornerShape(20.dp), color = Color(0xFF102A50), modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(18.dp).heightIn(min = 64.dp)) {
+                            Text("Status", color = Orange, fontSize = 17.sp, fontWeight = FontWeight.Medium)
+                            Spacer(Modifier.height(8.dp))
+                            Text("Bereit für spätere Anwendungen und Funktionen.", color = Pale, fontSize = 14.sp)
+                        }
+                    }
+                    Spacer(Modifier.height(18.dp))
+                    CpuRadarCard(reading, visible)
                     Spacer(Modifier.height(28.dp))
                 }
                 if (settings) SettingsPopup(refresh, onClose = { settings = false })
@@ -124,54 +139,6 @@ private fun AnalogClock(time: ZonedDateTime, modifier: Modifier) {
         drawLine(Pale, center, point(minutes * 6f, radius * 0.64f), 4.dp.toPx(), StrokeCap.Round)
         drawLine(Orange, point(seconds * 6f + 180, radius * 0.15f), point(seconds * 6f, radius * 0.70f), 2.dp.toPx(), StrokeCap.Round)
         drawCircle(Orange, 5.dp.toPx(), center)
-    }
-}
-
-@Composable
-private fun BatteryCard(reading: DeviceReading) {
-    Surface(shape = RoundedCornerShape(20.dp), color = Color(0xFF102A50), modifier = Modifier.fillMaxWidth()) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(if (reading.charging) "Akku · lädt" else "Akku", color = Pale, fontSize = 17.sp)
-            Text(reading.battery?.let { "$it %" } ?: "—", color = Orange, fontSize = 28.sp, fontWeight = FontWeight.Medium)
-        }
-    }
-}
-
-private fun percent(value: Float?) = value?.let { String.format(Locale.GERMAN, "%.1f %%", it) } ?: "—"
-
-@Composable
-private fun CpuCard(reading: DeviceReading) {
-    Surface(shape = RoundedCornerShape(20.dp), color = Color(0xFF102A50), modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(20.dp)) {
-            Text(reading.cpuSource, color = Pale, fontSize = 17.sp)
-            Spacer(Modifier.height(18.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                listOf("Minimum" to reading.cpu.minimum, "Aktuell" to reading.cpu.current,
-                    "Maximum" to reading.cpu.maximum).forEach { (label, value) ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(percent(value), color = if (label == "Aktuell") Orange else Color.White, fontSize = 20.sp)
-                        Text(label, color = Pale, fontSize = 12.sp)
-                    }
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-            Canvas(Modifier.fillMaxWidth().height(12.dp).semantics {
-                contentDescription = "CPU aktuell ${percent(reading.cpu.current)}"
-            }) {
-                drawRoundRect(Color(0xFF06152B), cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
-                reading.cpu.current?.let { value ->
-                    drawRoundRect(Orange, size = size.copy(width = size.width * value / 100f),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
-                }
-                listOfNotNull(reading.cpu.minimum, reading.cpu.maximum).forEach { value ->
-                    val x = (size.width * value / 100f).coerceIn(1.dp.toPx(), size.width - 1.dp.toPx())
-                    drawLine(Pale, Offset(x, 0f), Offset(x, size.height), 2.dp.toPx())
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(if (reading.cpuAvailable) "Live · jede Sekunde" else "Warte auf CPU-Messung …", color = Pale, fontSize = 12.sp)
-        }
     }
 }
 
@@ -234,9 +201,9 @@ private fun SettingsPopup(refresh: Int, onClose: () -> Unit) {
                 Text("Noch kein KI-Modul installiert. Ein lokales Sprachmodell oder ein KI-Dienst kann als eigenes Modul ergänzt werden.", color = Pale)
                 HorizontalDivider(Modifier.padding(vertical = 20.dp))
                 Text("CPU-Anzeige", color = Orange, fontSize = 19.sp)
-                Text("Die Messung aktualisiert sich jede Sekunde, solange FYLO sichtbar ist. Minimum und Maximum gelten seit dem App-Start. Wenn Android die Geräte-CPU sperrt, wird die CPU-Nutzung von FYLO angezeigt, bezogen auf alle verfügbaren Kerne. Die Quelle steht über den Werten.", color = Pale)
+                Text("Die Messung aktualisiert sich jede Sekunde, solange FYLO sichtbar ist. Minimum und Maximum gelten seit dem App-Start. Wenn Android die Geräte-CPU sperrt, wird die CPU-Nutzung von FYLO angezeigt, bezogen auf alle verfügbaren Kerne. Die Quelle steht über dem Diagramm. Das Spinnennetz hat drei Achsen: Minimum, aktuell und Maximum. Die Skala passt sich an den Maximum-Peak an. Der umlaufende orange Punkt zeigt die aktuelle Auslastung durch seinen Abstand zur Mitte; seine Rotation ist eine Animation, keine zusätzliche Messung.", color = Pale)
                 Spacer(Modifier.height(16.dp))
-                Text("FYLO 0.1.0 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
+                Text("FYLO 0.1.1 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
             }
         }
     }
