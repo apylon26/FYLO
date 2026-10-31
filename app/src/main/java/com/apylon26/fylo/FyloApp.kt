@@ -1,7 +1,6 @@
 package com.apylon26.fylo
 
 import android.content.Intent
-import java.io.File
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.lazy.LazyRow
@@ -60,7 +59,7 @@ internal val Pale = Color(0xFFB9CDE8)
 fun FyloApp(visible: Boolean, refresh: Int) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val repository = remember { ScreenRepository(AndroidScreenDisk(File(context.filesDir, "screens-v1.json"))) }
+    val repository = remember { ScreenStores.get(context.applicationContext) }
     val mutations = remember { Mutex() }
     var model by remember { mutableStateOf<ScreenState?>(null) }
     var screenError by remember { mutableStateOf<String?>(null) }
@@ -259,7 +258,8 @@ private fun SettingsPopup(modules: List<InstalledModule>, onReload: () -> Unit, 
             Column(Modifier.fillMaxWidth().heightIn(max = 650.dp).verticalScroll(rememberScrollState()).padding(22.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text("Systemsteuerung", fontSize = 19.sp, fontWeight = FontWeight.Medium)
+                    Text("Systemsteuerung", fontSize = 19.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+                    Spacer(Modifier.width(8.dp))
                     RoundButton("×", "Systemsteuerung schließen", onClose)
                 }
                 Spacer(Modifier.height(20.dp))

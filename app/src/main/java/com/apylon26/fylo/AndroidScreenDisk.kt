@@ -1,7 +1,16 @@
 package com.apylon26.fylo
 
+import android.content.Context
 import android.util.AtomicFile
 import java.io.File
+
+/** One repository/lock survives Activity recreation within the host's single process. */
+object ScreenStores {
+    @Volatile private var instance: ScreenRepository? = null
+    fun get(context: Context): ScreenRepository = instance ?: synchronized(this) {
+        instance ?: ScreenRepository(AndroidScreenDisk(File(context.filesDir, "screens-v1.json"))).also { instance = it }
+    }
+}
 
 class AndroidScreenDisk(file: File) : ScreenDisk {
     private val atomic = AtomicFile(file)
