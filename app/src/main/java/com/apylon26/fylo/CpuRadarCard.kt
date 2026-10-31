@@ -59,7 +59,6 @@ internal fun CpuRadarCard(reading: DeviceReading, visible: Boolean) {
                 for (axis in 0..2) {
                     val vertex = point(RadarGeometry.axis(axis))
                     drawLine(Pale.copy(alpha = 0.5f), center, vertex, 1.dp.toPx())
-                    drawCircle(Blue, 4.dp.toPx(), vertex)
                 }
                 // Top = current, lower right = maximum, lower left = minimum.
                 val values = listOf(stats.current, stats.maximum, stats.minimum)
@@ -68,9 +67,8 @@ internal fun CpuRadarCard(reading: DeviceReading, visible: Boolean) {
                     val shape = polygon(points)
                     drawPath(shape, Blue.copy(alpha = 0.3f))
                     drawPath(shape, Color(0xFF6DBAFF), style = Stroke(2.dp.toPx()))
-                    points.forEachIndexed { index, position ->
-                        drawCircle(if (index == 0) Orange else Pale, 4.dp.toPx(), position)
-                    }
+                    // Exactly three value markers: fixed minimum/maximum and the moving current marker.
+                    points.drop(1).forEach { position -> drawCircle(Pale, 4.dp.toPx(), position) }
                     val marker = point(RadarGeometry.orbit(phase, (stats.current!! / ceiling) * 0.9f))
                     drawLine(Orange.copy(alpha = 0.30f), center, marker, 1.dp.toPx())
                     drawCircle(Orange.copy(alpha = 0.15f), 12.dp.toPx(), marker)
