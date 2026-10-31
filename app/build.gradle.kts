@@ -10,8 +10,8 @@ android {
         applicationId = "com.apylon26.fylo.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "0.1.2"
+        versionCode = 12
+        versionName = "0.2.0"
     }
     buildTypes { getByName("debug") { signingConfig = null } }
     buildFeatures { compose = true }
@@ -29,4 +29,5 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.ui:ui")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }

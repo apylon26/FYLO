@@ -1,16 +1,26 @@
-# FYLO 0.1.2 – Assistenz-Kern
+# FYLO 0.2.0 – Assistenz-Kern
 
-Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 11; applicationId und Signaturschlüssel bleiben erhalten.
+Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 12; applicationId und Signaturschlüssel bleiben erhalten.
 
 ## Startbildschirm
 
 - Analoge Uhr mit Sekundenzeiger, gegenüber 0.1.1 um weitere 25 % im Durchmesser verkleinert.
 - Die gesamte Uhr hat 60 % Deckkraft (40 % transparent).
-- Datum, Akkustand und Ladezustand rechts neben der Uhr.
+- Datum und kompakte Akku-/Ladeanzeige (14 sp) rechts neben der Uhr.
+- Direkte KI-Zugriffszeile. Sie öffnet ein installiertes Modul mit der Rolle assistant; ohne KI-Modul erscheint ein klarer Hinweis.
+- Benannte Screens mit unlabeled Kacheln oberhalb des Statusfensters und horizontalem Wischen.
+- Die Systemsteuerung legt Screens an, zeigt Bezeichnung und automatisch vergebene vierstellige Signatur und löscht nur Screens ohne Modulzuordnungen.
+- Module lassen sich über ihre Screen-Zuordnung auf einen Screen setzen oder davon entfernen. Nicht verfügbare Module behalten ihre Zuordnung, bis sie ausdrücklich entfernt wird.
 - Statusfenster unterhalb der Uhr für spätere Anwendungen und Funktionen.
 - Zahnrad oben rechts öffnet das Einstellungen-Popup.
 
 Die CPU-Funktion ist vollständig entfernt: keine Messungen, kein Diagramm, keine Peak-Werte und kein CPU-Abschnitt in den Einstellungen. Uhr und Batterieanzeige aktualisieren sich im Vordergrund; im Hintergrund pausieren die Abfragen.
+
+## Screen-Daten und Migration
+
+Bei der ersten Nutzung von 0.2.0 wird atomar die Datei screens-v1.json (Schema 1) im privaten App-Verzeichnis angelegt. Der erste Screen heißt Start und bekommt 0001. Aus 0.1.2 müssen keine Screen-Daten migriert werden; installierte Module werden nicht verändert und zunächst keinem Screen zugeordnet. Namen, Signaturen, Modulzuordnungen und die KI-Modulauswahl bleiben über Neustarts erhalten. Defekte/unbekannte Daten werden gemeldet und nicht überschrieben.
+
+Die Signaturen werden unter Schreibsperre fortlaufend von 0001 bis 9999 vergeben und nie wiederverwendet. Der Zähler bleibt auch nach dem Löschen bestehen. Nach 9999 vergebenen Signaturen wird die Erstellung mit einem Hinweis abgelehnt. Die Eindeutigkeit gilt innerhalb der gespeicherten FYLO-Installation; das Löschen sämtlicher App-Daten setzt auch diesen Verlauf zurück. Auch der letzte Screen darf gelöscht werden, wenn er leer ist. Die Systemsteuerung bleibt erreichbar.
 
 ## Module und KI
 

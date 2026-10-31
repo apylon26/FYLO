@@ -10,7 +10,7 @@ import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-data class InstalledModule(val title: String, val component: ComponentName)
+data class InstalledModule(val title: String, val component: ComponentName, val isAssistant: Boolean = false)
 
 @Suppress("DEPRECATION")
 fun installedModules(context: Context): List<InstalledModule> {
@@ -20,7 +20,7 @@ fun installedModules(context: Context): List<InstalledModule> {
             val info = result.activityInfo
             ModulePolicy.accepts(info.exported, info.enabled && info.applicationInfo.enabled,
                 info.metaData?.getInt(ModulePolicy.API_KEY, -1) ?: -1, !info.permission.isNullOrEmpty())
-        }.map { InstalledModule(it.loadLabel(manager).toString(), ComponentName(it.activityInfo.packageName, it.activityInfo.name)) }
+        }.map { InstalledModule(it.loadLabel(manager).toString(), ComponentName(it.activityInfo.packageName, it.activityInfo.name), it.activityInfo.metaData?.getString("com.apylon26.fylo.ROLE") == "assistant") }
         .distinctBy { it.component }.sortedBy { it.title }
 }
 

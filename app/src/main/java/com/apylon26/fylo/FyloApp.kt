@@ -1,6 +1,13 @@
 package com.apylon26.fylo
 
 import android.content.Intent
+import java.io.File
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -52,13 +59,51 @@ internal val Pale = Color(0xFFB9CDE8)
 @Composable
 fun FyloApp(visible: Boolean, refresh: Int) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val repository = remember { ScreenRepository(AndroidScreenDisk(File(context.filesDir, "screens-v1.json"))) }
+    val mutations = remember { Mutex() }
+    var model by remember { mutableStateOf<ScreenState?>(null) }
+    var screenError by remember { mutableStateOf<String?>(null) }
+    var modules by remember { mutableStateOf(emptyList<InstalledModule>()) }
+    var reload by remember { mutableIntStateOf(0) }
     var settings by rememberSaveable { mutableStateOf(false) }
+    var assistantDialog by rememberSaveable { mutableStateOf(false) }
     var reading by remember { mutableStateOf(DeviceReading()) }
     var now by remember { mutableStateOf(ZonedDateTime.now()) }
     val monitor = remember { DeviceMonitor(context.applicationContext) }
-    LaunchedEffect(visible) {
-        if (visible) monitor.observe { reading = it }
+    val screens = model?.screens.orEmpty()
+    val pager = rememberPagerState(pageCount = { screens.size })
+    fun change(operation: () -> ScreenState) {
+        scope.launch {
+            mutations.withLock {
+                try {
+                    model = withContext(Dispatchers.IO) { operation() }
+                    screenError = null
+                } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
+                    screenError = e.message ?: "Die Screen-Daten konnten nicht gespeichert werden."
+                }
+            }
+        }
     }
+    fun launchModule(module: InstalledModule, signature: String?) {
+        try {
+            context.startActivity(Intent(ModulePolicy.ACTION).setComponent(module.component)
+                .putExtra("com.apylon26.fylo.SCREEN_SIGNATURE", signature))
+        } catch (_: Exception) { screenError = "Dieses Modul ist nicht mehr verfügbar."; reload++ }
+    }
+    LaunchedEffect(Unit) {
+        try { model = withContext(Dispatchers.IO) { repository.read() } }
+        catch (e: Exception) {
+            if (e is kotlinx.coroutines.CancellationException) throw e
+            screenError = "Screen-Daten nicht lesbar. Sie werden nicht überschrieben."
+        }
+    }
+    LaunchedEffect(refresh, reload) { modules = withContext(Dispatchers.IO) { installedModules(context) } }
+    LaunchedEffect(screens.size) {
+        if (screens.isNotEmpty() && pager.currentPage >= screens.size) pager.scrollToPage(screens.lastIndex)
+    }
+    LaunchedEffect(visible) { if (visible) monitor.observe { reading = it } }
     LaunchedEffect(visible) {
         if (visible) while (true) { now = ZonedDateTime.now(); delay(1000L - System.currentTimeMillis() % 1000L) }
     }
@@ -68,11 +113,10 @@ fun FyloApp(visible: Boolean, refresh: Int) {
             BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF10396C), Navy)))
                 .windowInsetsPadding(WindowInsets.safeDrawing)) {
                 val clockSize = minOf(maxWidth - 48.dp, maxHeight * 0.44f, 360.dp) / 2 * 0.75f
-                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row(Modifier.fillMaxWidth().height(72.dp), horizontalArrangement = Arrangement.End,
+                Column(Modifier.fillMaxSize().padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(Modifier.fillMaxWidth().height(64.dp), horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically) {
-                        RoundButton("⚙", "Einstellungen öffnen") { settings = true }
+                        RoundButton("⚙", "Systemsteuerung öffnen") { settings = true }
                     }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         AnalogClock(now, Modifier.size(clockSize).alpha(0.60f))
@@ -80,22 +124,72 @@ fun FyloApp(visible: Boolean, refresh: Int) {
                         Column(Modifier.weight(1f)) {
                             Text(now.format(DateTimeFormatter.ofPattern("EEEE", Locale.GERMAN)), color = Pale, fontSize = 16.sp)
                             Text(now.format(DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN)), fontSize = 20.sp, fontWeight = FontWeight.Medium)
-                            Spacer(Modifier.height(18.dp))
-                            Text(if (reading.charging) "Akku · lädt" else "Akku", color = Pale, fontSize = 14.sp)
-                            Text(reading.battery?.let { "$it %" } ?: "—", color = Orange, fontSize = 28.sp)
+                            Spacer(Modifier.height(12.dp))
+                            Text((if (reading.charging) "Akku · lädt " else "Akku ") + (reading.battery?.let { "$it %" } ?: "—"), color = Pale, fontSize = 14.sp)
                         }
                     }
-                    Spacer(Modifier.height(18.dp))
-                    Surface(shape = RoundedCornerShape(20.dp), color = Color(0xFF102A50), modifier = Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(18.dp).heightIn(min = 64.dp)) {
-                            Text("Status", color = Orange, fontSize = 17.sp, fontWeight = FontWeight.Medium)
-                            Spacer(Modifier.height(8.dp))
-                            Text("Bereit für spätere Anwendungen und Funktionen.", color = Pale, fontSize = 14.sp)
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = {
+                        val assistants = modules.filter { it.isAssistant }
+                        val chosen = assistants.firstOrNull { it.component.flattenToString() == model?.assistant }
+                            ?: assistants.singleOrNull()
+                        if (chosen != null) launchModule(chosen, screens.getOrNull(pager.currentPage)?.signature)
+                        else assistantDialog = true
+                    }) { Text("KI-Assistent öffnen  →") }
+                    Spacer(Modifier.height(8.dp))
+                    LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        items(screens, key = { it.signature }) { screen ->
+                            val selected = screens.getOrNull(pager.currentPage)?.signature == screen.signature
+                            Box(Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).clickable {
+                                scope.launch { pager.animateScrollToPage(screens.indexOf(screen)) }
+                            }.semantics { contentDescription = "Screen ${screen.name}, Signatur ${screen.signature}" }, contentAlignment = Alignment.Center) {
+                                Box(Modifier.size(25.dp).clip(RoundedCornerShape(6.dp))
+                                    .background(if (selected) Orange else Blue)
+                                    .border(1.dp, Pale, RoundedCornerShape(6.dp)))
+                            }
                         }
                     }
-                    Spacer(Modifier.height(28.dp))
+                    screenError?.let { Text(it, color = Orange, fontSize = 12.sp) }
+                    if (screens.isEmpty()) {
+                        Text(if (model == null) "Screens werden geladen …" else "Noch kein Screen. Bitte in der Systemsteuerung anlegen.", color = Pale)
+                    } else HorizontalPager(state = pager, key = { screens[it].signature }, modifier = Modifier.weight(1f).fillMaxWidth()) { index ->
+                        val screen = screens[index]
+                        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                            Surface(shape = RoundedCornerShape(20.dp), color = Color(0xFF102A50), modifier = Modifier.fillMaxWidth()) {
+                                Column(Modifier.padding(18.dp).heightIn(min = 64.dp)) {
+                                    Text("Status · ${screen.name}", color = Orange, fontSize = 17.sp)
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("Bereit für spätere Anwendungen und Funktionen.", color = Pale, fontSize = 14.sp)
+                                }
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            val assigned = model?.assignments.orEmpty().filterValues { it == screen.signature }
+                            assigned.keys.forEach { id ->
+                                val module = modules.firstOrNull { it.component.flattenToString() == id }
+                                OutlinedButton(enabled = module != null, modifier = Modifier.fillMaxWidth(), onClick = {
+                                    if (module != null) launchModule(module, screen.signature)
+                                }) { Text(module?.title ?: "Modul nicht verfügbar") }
+                            }
+                            Spacer(Modifier.height(20.dp))
+                        }
+                    }
                 }
-                if (settings) SettingsPopup(refresh, onClose = { settings = false })
+                if (settings) SettingsPopup(modules, { reload++ }, model, repository, ::change, screenError, onClose = { settings = false })
+                if (assistantDialog) AlertDialog(onDismissRequest = { assistantDialog = false }, title = { Text("KI-Assistent") },
+                    text = {
+                        Column {
+                            val choices = modules.filter { it.isAssistant }
+                            if (choices.isEmpty()) Text("Noch kein KI-Modul installiert. Ein kompatibles KI-Modul kann über die Systemsteuerung ergänzt werden.")
+                            choices.forEach { module ->
+                                TextButton(onClick = {
+                                    change { repository.assistant(module.component.flattenToString()) }
+                                    assistantDialog = false
+                                    launchModule(module, screens.getOrNull(pager.currentPage)?.signature)
+                                }) { Text(module.title) }
+                            }
+                        }
+                    }, confirmButton = { TextButton(onClick = { assistantDialog = false; settings = true }) { Text("Systemsteuerung") } },
+                    dismissButton = { TextButton(onClick = { assistantDialog = false }) { Text("Schließen") } })
             }
         }
     }
@@ -142,16 +236,11 @@ private fun AnalogClock(time: ZonedDateTime, modifier: Modifier) {
 }
 
 @Composable
-private fun SettingsPopup(refresh: Int, onClose: () -> Unit) {
+private fun SettingsPopup(modules: List<InstalledModule>, onReload: () -> Unit, model: ScreenState?, repository: ScreenRepository, change: (() -> ScreenState) -> Unit, screenError: String?, onClose: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var modules by remember { mutableStateOf(emptyList<InstalledModule>()) }
     var message by rememberSaveable { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
-    var reload by remember { mutableStateOf(0) }
-    LaunchedEffect(refresh, reload) {
-        modules = withContext(Dispatchers.IO) { installedModules(context) }
-    }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
             busy = true
@@ -170,10 +259,13 @@ private fun SettingsPopup(refresh: Int, onClose: () -> Unit) {
             Column(Modifier.fillMaxWidth().heightIn(max = 650.dp).verticalScroll(rememberScrollState()).padding(22.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text("Einstellungen", fontSize = 21.sp, fontWeight = FontWeight.Medium)
-                    RoundButton("×", "Einstellungen schließen", onClose)
+                    Text("Systemsteuerung", fontSize = 19.sp, fontWeight = FontWeight.Medium)
+                    RoundButton("×", "Systemsteuerung schließen", onClose)
                 }
                 Spacer(Modifier.height(20.dp))
+                ScreenManagement(model, modules, repository, change)
+                screenError?.let { Text(it, color = Orange) }
+                HorizontalDivider(Modifier.padding(vertical = 16.dp))
                 Text("Module", color = Orange, fontSize = 19.sp)
                 Text("Erweiterungen werden separat installiert und hier geöffnet.", color = Pale)
                 Spacer(Modifier.height(10.dp))
@@ -186,20 +278,22 @@ private fun SettingsPopup(refresh: Int, onClose: () -> Unit) {
                         } else picker.launch(arrayOf("application/vnd.android.package-archive", "application/octet-stream"))
                     } catch (_: Exception) { message = "Die Android-Modulinstallation ist auf diesem Gerät nicht verfügbar." }
                 }) { Text(if (busy) "Modul wird geprüft …" else "+ Modul installieren") }
-                TextButton(onClick = { reload++ }) { Text("Module aktualisieren") }
+                TextButton(onClick = onReload) { Text("Module aktualisieren") }
                 if (modules.isEmpty()) Text("Noch keine Module installiert.", color = Pale)
                 modules.forEach { module ->
                     OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = {
-                        try { context.startActivity(Intent(ModulePolicy.ACTION).setComponent(module.component)) }
-                        catch (_: Exception) { message = "Das Modul ist nicht mehr verfügbar."; reload++ }
+                        try { context.startActivity(Intent(ModulePolicy.ACTION).setComponent(module.component)
+                            .putExtra("com.apylon26.fylo.SCREEN_SIGNATURE", model?.assignments?.get(module.component.flattenToString()))) }
+                        catch (_: Exception) { message = "Das Modul ist nicht mehr verfügbar."; onReload() }
                     }) { Text(module.title) }
+                    if (model != null) ModulePlacement(module, model, repository, change)
                 }
                 message?.let { Spacer(Modifier.height(10.dp)); Text(it, color = Orange) }
                 HorizontalDivider(Modifier.padding(vertical = 20.dp))
                 Text("KI-Assistent", color = Orange, fontSize = 19.sp)
-                Text("Noch kein KI-Modul installiert. Ein lokales Sprachmodell oder ein KI-Dienst kann als eigenes Modul ergänzt werden.", color = Pale)
+                AssistantSelection(modules, model, repository, change)
                 Spacer(Modifier.height(16.dp))
-                Text("FYLO 0.1.2 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
+                Text("FYLO 0.2.0 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
             }
         }
     }
