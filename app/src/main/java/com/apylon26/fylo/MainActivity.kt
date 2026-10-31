@@ -8,12 +8,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
-    private var visible by mutableStateOf(false)
+    private var appVisible by mutableStateOf(false)
     private var refresh by mutableStateOf(0)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { FyloApp(visible, refresh) }
+        setContent { FyloApp(appVisible, refresh) }
     }
-    override fun onResume() { super.onResume(); refresh++; visible = true }
-    override fun onPause() { visible = false; super.onPause() }
+    override fun onResume() { super.onResume(); refresh++; appVisible = true }
+    override fun onPause() { appVisible = false; super.onPause() }
 }
