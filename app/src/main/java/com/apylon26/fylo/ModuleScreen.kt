@@ -75,8 +75,9 @@ internal fun ModuleScreen(screen: FyloScreen, assigned: Set<String>, modules: Li
 @Composable
 private fun ModuleTile(module: InstalledModule?, refresh: Int, onOpen: () -> Unit) {
     val context = LocalContext.current
-    val icon by produceState<ImageBitmap?>(null, module?.component, refresh) {
-        value = if (module == null) null else withContext(Dispatchers.IO) {
+    var icon by remember(module?.component, refresh) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(module?.component, refresh) {
+        icon = if (module == null) null else withContext(Dispatchers.IO) {
             runCatching { context.packageManager.getActivityIcon(module.component).toBitmap(144, 144).asImageBitmap() }.getOrNull()
         }
     }
