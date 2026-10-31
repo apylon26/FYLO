@@ -72,7 +72,7 @@ class FyloStore(context: Context) {
         notes.clear()
         notes.addAll(updated)
     }
-    fun setFilesTree(uri: String) {
+    fun configureFilesTree(uri: String) {
         check(prefs.edit().putString("files_tree", uri).commit()) { "Ablage konnte nicht gespeichert werden." }
         filesTree = uri
     }

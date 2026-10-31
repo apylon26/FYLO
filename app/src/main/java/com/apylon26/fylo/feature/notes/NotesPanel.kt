@@ -61,7 +61,7 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
                     context.contentResolver.takePersistableUriPermission(uri,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     files.prepare(uri.toString())
-                    store.setFilesTree(uri.toString())
+                    store.configureFilesTree(uri.toString())
                     notice = "Ablage FYLO/Dateien ist eingerichtet."
                 } catch (_: Exception) { error = "Ablage nicht verfügbar. Bitte einen beschreibbaren Ordner auswählen." }
                 finally { busy = false }
