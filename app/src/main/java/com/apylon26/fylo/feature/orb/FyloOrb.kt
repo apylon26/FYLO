@@ -2,6 +2,9 @@ package com.apylon26.fylo.feature.orb
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.graphics.RectF
+import com.apylon26.fylo.R
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -38,7 +41,9 @@ fun FyloOrb(active: Boolean, modifier: Modifier = Modifier) {
 }
 
 private class OrbView(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+    private val core = BitmapFactory.decodeResource(resources, R.drawable.fylo_core)
+    private val coreBounds = RectF()
     private val blue = Color.rgb(36, 165, 255)
     private val orange = Color.rgb(255, 139, 36)
     private val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -160,14 +165,8 @@ private class OrbView(context: Context) : View(context) {
             }
         }
         satellites(false)
-        sphere(canvas, cx, cy, r, blue)
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = r * .035f
-        paint.color = if (touched) Color.rgb(255, 184, 87) else orange
-        canvas.drawArc(cx - r * .9f, cy - r * .9f, cx + r * .9f, cy + r * .9f, -75f, 105f, false, paint)
-        paint.color = blue
-        canvas.drawCircle(cx, cy, r * .31f, paint)
-        paint.style = Paint.Style.FILL
+        coreBounds.set(cx - r * 1.27f, cy - r * 1.27f, cx + r * 1.27f, cy + r * 1.27f)
+        canvas.drawBitmap(core, null, coreBounds, paint)
         satellites(true)
     }
 }

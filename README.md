@@ -65,3 +65,11 @@ Der konkrete Akkuverbrauch wurde noch nicht auf einem Gerät gemessen.
 Die bisherigen CI-Läufe erzeugten unterschiedliche temporäre Debug-Schlüssel. Ein Update der alten App ist ohne deren ursprünglichen privaten Schlüssel nicht möglich. FYLO Neu (com.apylon26.fylo.app) wird deshalb parallel installiert; die alte App und ihre Daten bleiben erhalten. Es gibt keine automatische Datenübernahme.
 
 CI erzeugt nun ausdrücklich nicht installierbare, unsignierte Entwicklungs-APKs. Vor der Weitergabe werden diese mit tools/sign_apk.py und dem privat gesicherten festen Schlüssel signiert und geprüft. Der private Schlüssel liegt ausschließlich im Backup FYLO-Android-Signierung.zip außerhalb dieses Repositorys. Der SHA-256-Fingerabdruck des Zertifikats ist im Skript festgehalten. Keine zufälligen Ersatzschlüssel verwenden. Der Installationsdialog von Play Protect für unbekannte Entwickler kann weiterhin erscheinen.
+
+## Oberfläche 0.4.0
+
+Die numerische Seitenzählung entfällt. Der blaue/orange Kern wurde aus dem ursprünglichen Design als transparentes Bildelement aufbereitet; Satelliten werden weiterhin mit etwa 30 Aktualisierungen pro Sekunde davor und dahinter bewegt. Rechts daneben stehen lokale Uhrzeit und Akkustand sowie CPU FYLO.
+
+CPU FYLO ist die gemessene Prozess-CPU-Zeit (Process.getElapsedCpuTime) geteilt durch die vergangene Echtzeit und die Anzahl logischer Prozessoren, in Prozent der gesamten logischen CPU-Kapazität. Es ist ausdrücklich keine Messung der gesamten Systemauslastung. Aktualisierung einmal pro Sekunde, ausschließlich bei sichtbarer Startseite und aktiver App. Min und Max beziehen sich auf die gültigen Messungen während der Lebensdauer des Statusfensters; Hintergrundintervalle werden nicht einbezogen. Der erste Wert erscheint nach einer Sekunde. Min/aktuell/Max stehen auf einer festen Skala von 0 bis 100 Prozent und haben identisch große rechteckige Marker (blau/orange/blau). Bei gleichen Werten überlagern sich die Marker; die drei Zahlen bleiben separat lesbar.
+
+App-Kennung, privater Signaturschlüssel und Datenformat bleiben unverändert.

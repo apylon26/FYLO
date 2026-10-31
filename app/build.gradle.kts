@@ -10,8 +10,8 @@ android {
         applicationId = "com.apylon26.fylo.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.3.1"
+        versionCode = 5
+        versionName = "0.4.0"
     }
     // Signing is performed after CI with the privately backed-up, persistent key.
     buildTypes { getByName("debug") { signingConfig = null } }
