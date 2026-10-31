@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.apylon26.fylo.feature.orb.FyloOrb
 import com.apylon26.fylo.data.FyloStore
 import com.apylon26.fylo.modules.ModuleId
 import com.apylon26.fylo.modules.ModuleRegistry
@@ -48,7 +49,7 @@ fun FyloShell(store: FyloStore) {
                     Text("0${index + 1} / 04", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                     Text(pages[index], style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                     when (index) {
-                        0 -> HomeScreen(store, onOpen = { opened = it.name }, onAssistant = { scope.launch { pager.animateScrollToPage(1) } })
+                        0 -> HomeScreen(store, orbActive = pager.currentPage == 0 && !pager.isScrollInProgress && opened == null, onOpen = { opened = it.name }, onAssistant = { scope.launch { pager.animateScrollToPage(1) } })
                         1 -> AssistantScreen(store)
                         2 -> ModulesScreen(store)
                         else -> SystemScreen()
@@ -90,7 +91,8 @@ private fun InfoCard(title: String, detail: String) {
 }
 
 @Composable
-private fun HomeScreen(store: FyloStore, onOpen: (ModuleId) -> Unit, onAssistant: () -> Unit) {
+private fun HomeScreen(store: FyloStore, orbActive: Boolean, onOpen: (ModuleId) -> Unit, onAssistant: () -> Unit) {
+    FyloOrb(active = orbActive, modifier = Modifier.fillMaxWidth().height(220.dp))
     Text("Hallo Andreas.", style = MaterialTheme.typography.headlineSmall)
     Text("Dein Raum für Gedanken, Aufgaben und nächste Schritte.", color = MaterialTheme.colorScheme.onSurfaceVariant)
     InfoCard("Alles im Blick", "${store.tasks.count { !it.done }} offene Aufgaben · ${ModuleRegistry.modules.count { store.enabled(it.id) }} aktive Module")
@@ -156,7 +158,7 @@ private fun ModulesScreen(store: FyloStore) {
 
 @Composable
 private fun SystemScreen() {
-    InfoCard("FYLO 0.2.0", "Eigenständige Android-App mit vier wischbaren Seiten und einem gemeinsamen Modulkern.")
+    InfoCard("FYLO 0.3.0", "Eigenständige Android-App mit vier wischbaren Seiten und einem gemeinsamen Modulkern.")
     InfoCard("Deine Daten", "Aufgaben, Notizen und Moduleinstellungen bleiben lokal im privaten App-Bereich. Bei einer Deinstallation können sie verloren gehen.")
     InfoCard("Verbindungen", "Kein KI-Anbieter verbunden. Keine Anmeldung und keine API-Schlüssel erforderlich.")
     Text("FYLO ist eine eigene Haupt-App. Der Android-Startbildschirm und andere Handy-Apps bleiben separat verfügbar.", style = MaterialTheme.typography.bodyMedium)

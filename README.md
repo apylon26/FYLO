@@ -53,3 +53,9 @@ Keine Schlüssel oder privaten Informationen ins öffentliche Repository übertr
 
 Änderungswünsche hier beschreiben, Code im freigegebenen Repository bearbeiten, CI-Build prüfen
 und APK auf dem Handy testen. Zugang und tatsächliche Schreibmöglichkeiten sind jeweils zu prüfen.
+
+## FYLO 0.3.0 – animierter Kern
+
+Auf der Startseite kreisen vier Satelliten um eine blau-orange Kugel. Einfache Canvas-Verläufe statt aufwendiger Echtzeit-3D-Effekte; maximal etwa 30 Aktualisierungen pro Sekunde. Gedrückt halten beschleunigt die Bewegung und verstärkt das Licht. Beim Wischen, geöffnetem Modul, außerhalb des sichtbaren Bereichs sowie bei pausierter App oder ausgeschaltetem Display stoppt die Animation. Die Android-Einstellung zum Deaktivieren von Animationen wird berücksichtigt. Aufgaben, Notizen und Moduleinstellungen bleiben unverändert. Der Entwurf ist nativ nachgebildet; Kalender, Dateien und freie KI-Gespräche werden damit nicht ergänzt.
+
+Der konkrete Akkuverbrauch wurde noch nicht auf einem Gerät gemessen.

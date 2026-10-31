@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val store = remember { FyloStore(applicationContext) }
             MaterialTheme(colorScheme = darkColorScheme(
-                primary = Color(0xFF75E2D1), secondary = Color(0xFFB3B9FF),
+                primary = Color(0xFF37A9FF), secondary = Color(0xFFFF8B24), tertiary = Color(0xFFFF8B24),
                 background = Color(0xFF09111E), surface = Color(0xFF142136),
                 surfaceVariant = Color(0xFF20314A)
             )) { FyloShell(store) }
