@@ -54,6 +54,9 @@ class NoteFiles(private val context: Context) {
             throw error
         }
     }
+    suspend fun delete(attachment: NoteAttachment): Boolean = withContext(Dispatchers.IO) {
+        runCatching { Docs.deleteDocument(resolver, Uri.parse(attachment.uri)) }.getOrDefault(false)
+    }
     suspend fun discard(attachments: List<NoteAttachment>) = withContext(Dispatchers.IO) {
         attachments.forEach { runCatching { Docs.deleteDocument(resolver, Uri.parse(it.uri)) } }
     }

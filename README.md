@@ -92,3 +92,15 @@ Ungültiges Notiz-JSON blockiert das Speichern, statt Daten mit einer leeren Lis
 Dateien und Berechtigungen bleiben über App-Neustarts erhalten; entfernte Dateien oder entzogene
 Ordnerberechtigungen werden als Fehler gemeldet. Nach Deinstallation müssen vorhandene Kopien
 bei Bedarf neu zugeordnet werden. Die App kann keinen Ordner vor Installation und Auswahl auf dem Handy erstellen.
+
+## Notiz-Werkzeugleiste ab 0.6.0
+Oben stehen fünf blaue runde Schaltflächen mit Verlauf, Lichtkante und Schatten;
+die Zeichen sind orange: ✓ neue Notiz, + Datei hinzufügen, − Zuordnung entfernen,
+! Dateikopie löschen, X gesamtes Modul schließen. Unter den Symbolen stehen kurze Beschriftungen.
+Für − und ! zunächst einen Anhang über seinen Auswahlkreis markieren; der Dateiname öffnet ihn.
+Speichern bleibt als beschriftete Schaltfläche im Editor. Vor einer neuen Notiz
+müssen Änderungen gespeichert oder über „Zur Notizliste“ verworfen werden.
+Entfernen ändert ausschließlich die Zuordnung. Löschen erfordert eine Bestätigung
+und wird erst nach erfolgreichem Speichern an der FYLO-Kopie ausgeführt.
+Fehlgeschlagene Löschungen werden gemeldet und können durch erneutes Speichern wiederholt werden.
+Die ursprüngliche importierte Quelldatei bleibt erhalten. Datenformat, App-ID und Signatur bleiben gleich.
