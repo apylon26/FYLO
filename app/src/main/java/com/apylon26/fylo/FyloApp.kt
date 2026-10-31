@@ -140,7 +140,7 @@ fun FyloApp(visible: Boolean, refresh: Int) {
                             ?: assistants.singleOrNull()
                         if (chosen != null) launchModule(chosen, screens.getOrNull(pager.currentPage)?.signature)
                         else assistantDialog = true
-                    }) { Text("KI-Assistent öffnen  →") }
+                    }) { FyloActionIcon(FyloAction.OPEN); Spacer(Modifier.width(8.dp)); Text("KI-Assistent öffnen") }
                     Spacer(Modifier.height(8.dp))
                     LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         items(screens, key = { it.signature }) { screen ->
@@ -177,11 +177,11 @@ fun FyloApp(visible: Boolean, refresh: Int) {
                                     change { repository.assistant(module.component.flattenToString()) }
                                     assistantDialog = false
                                     launchModule(module, screens.getOrNull(pager.currentPage)?.signature)
-                                }) { Text(module.title) }
+                                }) { FyloActionIcon(FyloAction.OPEN); Spacer(Modifier.width(8.dp)); Text(module.title) }
                             }
                         }
-                    }, confirmButton = { TextButton(onClick = { assistantDialog = false; settings = true }) { Text("Systemsteuerung") } },
-                    dismissButton = { TextButton(onClick = { assistantDialog = false }) { Text("Schließen") } })
+                    }, confirmButton = { TextButton(onClick = { assistantDialog = false; settings = true }) { FyloActionIcon(FyloAction.OPEN); Spacer(Modifier.width(8.dp)); Text("Systemsteuerung") } },
+                    dismissButton = { TextButton(onClick = { assistantDialog = false }) { FyloActionIcon(FyloAction.CANCEL); Spacer(Modifier.width(8.dp)); Text("Abbrechen") } })
             }
         }
     }
@@ -253,7 +253,7 @@ private fun SettingsPopup(modules: List<InstalledModule>, onReload: () -> Unit, 
                     verticalAlignment = Alignment.CenterVertically) {
                     Text("Systemsteuerung", fontSize = 19.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
                     Spacer(Modifier.width(8.dp))
-                    RoundButton("×", "Systemsteuerung schließen", onClose)
+                    FyloIconButton(FyloAction.CLOSE, onClose)
                 }
                 Spacer(Modifier.height(20.dp))
                 ScreenManagement(model, modules, repository, change)
@@ -270,7 +270,7 @@ private fun SettingsPopup(modules: List<InstalledModule>, onReload: () -> Unit, 
                                 Uri.parse("package:${context.packageName}")))
                         } else picker.launch(arrayOf("application/vnd.android.package-archive", "application/octet-stream"))
                     } catch (_: Exception) { message = "Die Android-Modulinstallation ist auf diesem Gerät nicht verfügbar." }
-                }) { Text(if (busy) "Modul wird geprüft …" else "+ Modul installieren") }
+                }) { FyloActionIcon(FyloAction.ADD, enabled = !busy); Spacer(Modifier.width(8.dp)); Text(if (busy) "Modul wird geprüft …" else "Modul installieren") }
                 TextButton(onClick = onReload) { Text("Module aktualisieren") }
                 if (modules.isEmpty()) Text("Noch keine Module installiert.", color = Pale)
                 modules.forEach { module ->
@@ -278,7 +278,7 @@ private fun SettingsPopup(modules: List<InstalledModule>, onReload: () -> Unit, 
                         try { context.startActivity(Intent(ModulePolicy.ACTION).setComponent(module.component)
                             .putExtra("com.apylon26.fylo.SCREEN_SIGNATURE", model?.assignments?.get(module.component.flattenToString()))) }
                         catch (_: Exception) { message = "Das Modul ist nicht mehr verfügbar."; onReload() }
-                    }) { Text(module.title) }
+                    }) { FyloActionIcon(FyloAction.OPEN); Spacer(Modifier.width(8.dp)); Text(module.title) }
                     if (model != null) ModulePlacement(module, model, repository, change)
                 }
                 message?.let { Spacer(Modifier.height(10.dp)); Text(it, color = Orange) }
@@ -286,7 +286,7 @@ private fun SettingsPopup(modules: List<InstalledModule>, onReload: () -> Unit, 
                 Text("KI-Assistent", color = Orange, fontSize = 19.sp)
                 AssistantSelection(modules, model, repository, change)
                 Spacer(Modifier.height(16.dp))
-                Text("FYLO 0.2.1 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
+                Text("FYLO 0.2.2 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
             }
         }
     }

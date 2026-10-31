@@ -39,7 +39,10 @@ import kotlinx.coroutines.withContext
 internal fun StatusReportsWindow(report: String, isError: Boolean) {
     Surface(shape = RoundedCornerShape(18.dp), color = Color(0xFF102A50), modifier = Modifier.fillMaxWidth().height(108.dp)) {
         Column(Modifier.padding(14.dp)) {
-            Text("Statusberichte", color = Orange, fontSize = 17.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (isError) { FyloActionIcon(FyloAction.NOTICE, Modifier.size(24.dp)); Spacer(Modifier.width(6.dp)) }
+                Text("Statusberichte", color = Orange, fontSize = 17.sp)
+            }
             Spacer(Modifier.height(6.dp))
             Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
                 Text(report, color = if (isError) Orange else Pale, fontSize = 14.sp)

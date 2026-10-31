@@ -10,10 +10,11 @@ android {
         applicationId = "com.apylon26.fylo.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "0.2.1"
+        versionCode = 14
+        versionName = "0.2.2"
     }
     buildTypes { getByName("debug") { signingConfig = null } }
+    sourceSets.getByName("main").res.srcDir("../ui-icons/src/main/res")
     buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

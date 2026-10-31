@@ -1,6 +1,6 @@
-# FYLO 0.2.1 – Assistenz-Kern
+# FYLO 0.2.2 – Assistenz-Kern
 
-Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 13; applicationId und Signaturschlüssel bleiben erhalten.
+Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 14; applicationId und Signaturschlüssel bleiben erhalten.
 
 ## Startbildschirm
 
@@ -25,14 +25,14 @@ Die Signaturen werden unter Schreibsperre fortlaufend von 0001 bis 9999 vergeben
 
 ## Module und KI
 
-Separate FYLO-Modul-APKs lassen sich über das Einstellungen-Popup mit Androids Installer nachinstallieren und anschließend öffnen. Noch keine Module vorinstalliert. Die [Modulschnittstelle](docs/MODULES.md) ist dokumentiert. Das ist der Assistenz-Kern; ein KI-Modul/Sprachmodell ist noch nicht enthalten. Kein API-Schlüssel und kein kostenpflichtiger Dienst vorkonfiguriert.
+Separate FYLO-Modul-APKs lassen sich über das Einstellungen-Popup mit Androids Installer nachinstallieren und anschließend öffnen. Das separat installierbare [Notizmodul 1.0.0](docs/NOTES.md) ist enthalten; es wird als eigene APK ausgeliefert. Die neun gemeinsamen [Aktionsicons](docs/ICONS.md) sind den vorhandenen Funktionen zugeordnet. Die [Modulschnittstelle](docs/MODULES.md) ist dokumentiert. Das ist der Assistenz-Kern; ein KI-Modul/Sprachmodell ist noch nicht enthalten. Kein API-Schlüssel und kein kostenpflichtiger Dienst vorkonfiguriert.
 
 ## Bauen und prüfen
 
 JDK 17, Gradle 8.9, Android SDK 35:
 
 ```sh
-gradle --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+gradle --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug :notes:lintDebug :notes:testDebugUnitTest :notes:assembleDebug
 ```
 
 Der GitHub-Workflow führt diese Checks aus und erzeugt ein **unsigniertes, nicht direkt installierbares** internes Build-Artefakt. Installierbare Entwicklungs-APKs werden ausschließlich separat mit dem bestehenden privaten Schlüssel via tools/sign_apk.py signiert und geprüft. Keine Schlüssel im Repository.

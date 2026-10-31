@@ -30,10 +30,12 @@ jobs:
       - name: Install Android SDK
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - name: Check and build
-        run: gradle --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+        run: gradle --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug :notes:lintDebug :notes:testDebugUnitTest :notes:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: FYLO-unsigned-${{ github.run_number }}
-          path: app/build/outputs/apk/debug/app-debug-unsigned.apk
+          path: |
+            app/build/outputs/apk/debug/app-debug-unsigned.apk
+            notes/build/outputs/apk/debug/notes-debug-unsigned.apk
           if-no-files-found: error
           retention-days: 14
