@@ -1,17 +1,20 @@
 # FYLO development instructions
 
-FYLO is a native Android personal organizer for Andreas. User-facing text is German.
-Use Kotlin and Jetpack Compose. Keep features separated under feature/ as they grow.
-The initial app works offline and has no AI provider or API credentials.
-Do not describe planned modules as implemented. Never commit credentials or signing keys.
-For each change run `gradle :app:lintDebug :app:testDebugUnitTest :app:assembleDebug`
-with JDK 17, Gradle 8.9 and Android SDK 35, or report which checks could not run.
-Keep build dependencies pinned; do not upgrade unrelated dependencies.
-Preserve stored tasks and notes when changing persistence. Document migrations.
-Add meaningful tests for persistence and business logic changes.
-Do not modify release signing or publish releases without a user instruction.
+FYLO is being rebuilt from zero for Andreas. User-facing text is German.
+The current baseline is 0.0.0 and deliberately contains no runnable application or build workflow. Do not claim old modules are still implemented.
+Use Kotlin and Jetpack Compose when rebuilding the native Android app. Agree new features from the ongoing user instructions; do not automatically restore the previous UI or modules.
+Use the agreed icon style: classic blue circle, orange symbol, subtle 3D effect, transparent background, consistent proportions and lighting.
+Never commit credentials or signing keys. Keep future build dependencies pinned.
 
-## Installable development APKs
-CI deliberately builds unsigned debug APKs. Never distribute them directly or generate a new key for an update. Use tools/sign_apk.py and the existing private FYLO-Android-Signierung.zip backup from the user's Library. That backup contains credentials: never commit, log, or publish it. Verify the pinned certificate fingerprint. If the backup is unavailable, stop before delivering an APK. This concerns development signing only; release signing is unchanged.
+## Validation when an Android build exists
 
-Version 0.3.1 uses applicationId com.apylon26.fylo.app and launcher label FYLO Neu to coexist with the legacy com.apylon26.fylo app, whose ephemeral CI signing key is unavailable. Legacy data is preserved in that app and is NOT automatically migrated. Keep this new applicationId and signer stable for every subsequent update.
+Run `gradle :app:lintDebug :app:testDebugUnitTest :app:assembleDebug` with JDK 17, Gradle 8.9 and Android SDK 35, or report which checks could not run. Add meaningful tests for persistence and business logic changes. Do not modify release signing or publish releases without a user instruction.
+
+## Signing continuity
+
+For future development APKs use the existing private FYLO-Android-Signierung.zip backup from the user's Library and its pinned certificate fingerprint. Never commit, log, or publish its credentials. Never distribute unsigned debug APKs or generate a replacement signing key for an update. If the backup is unavailable, stop before delivering an APK.
+The last installed version used applicationId com.apylon26.fylo.app and launcher label FYLO Neu; retain the applicationId and signer for compatible builds. The legacy app used com.apylon26.fylo and has a different unavailable signer.
+
+## Reset scope
+
+The user authorized starting over including all old functions and data. The repository reset does not erase installed Android data or shared FYLO folders. Do not claim device data has been erased without actual device evidence. Preserve the old repository snapshot in backup/v0.7.0-before-reset-2026-10-31.
