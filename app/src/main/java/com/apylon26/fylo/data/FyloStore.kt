@@ -9,19 +9,29 @@ import com.apylon26.fylo.modules.ModuleId
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
+import com.apylon26.fylo.feature.notes.Note
+import com.apylon26.fylo.feature.notes.NoteCodec
 
 data class Task(val id: String, val title: String, val done: Boolean)
 
 class FyloStore(context: Context) {
     private val prefs = context.getSharedPreferences("fylo", Context.MODE_PRIVATE)
     val tasks = mutableStateListOf<Task>()
-    var note by mutableStateOf(prefs.getString("note", "") ?: "")
+    val notes = mutableStateListOf<Note>()
+    var notesError by mutableStateOf<String?>(null)
+        private set
+    var filesTree by mutableStateOf(prefs.getString("files_tree", null))
         private set
     var notesEnabled by mutableStateOf(prefs.getBoolean("module_NOTES", true))
         private set
     var tasksEnabled by mutableStateOf(prefs.getBoolean("module_TASKS", true))
         private set
     init {
+        try {
+            notes.addAll(NoteCodec.decode(prefs.getString("notes_v1", null), prefs.getString("note", "") ?: ""))
+        } catch (_: Exception) {
+            notesError = "Notizen konnten nicht gelesen werden. Die gespeicherten Daten bleiben erhalten."
+        }
         // Existing keys and JSON schema are retained from the start project.
         val raw = runCatching { JSONArray(prefs.getString("tasks", "[]") ?: "[]") }.getOrDefault(JSONArray())
         for (i in 0 until raw.length()) {
@@ -53,7 +63,19 @@ class FyloStore(context: Context) {
         if (index >= 0) { tasks[index] = task.copy(done = !task.done); saveTasks() }
     }
     fun delete(task: Task) { tasks.remove(task); saveTasks() }
-    fun saveNote(value: String) { note = value; prefs.edit().putString("note", value).apply() }
+    fun saveNote(value: Note) {
+        check(notesError == null) { "Die gespeicherten Notizen konnten nicht gelesen werden." }
+        val updated = notes.toMutableList()
+        val index = updated.indexOfFirst { it.id == value.id }
+        if (index < 0) updated.add(0, value) else updated[index] = value
+        check(prefs.edit().putString("notes_v1", NoteCodec.encode(updated)).commit()) { "Speichern fehlgeschlagen." }
+        notes.clear()
+        notes.addAll(updated)
+    }
+    fun setFilesTree(uri: String) {
+        check(prefs.edit().putString("files_tree", uri).commit()) { "Ablage konnte nicht gespeichert werden." }
+        filesTree = uri
+    }
     private fun saveTasks() {
         val raw = JSONArray()
         tasks.forEach { raw.put(JSONObject().put("id", it.id).put("title", it.title).put("done", it.done)) }

@@ -73,3 +73,22 @@ Die numerische Seitenzählung entfällt. Der blaue/orange Kern wurde aus dem urs
 CPU FYLO ist die gemessene Prozess-CPU-Zeit (Process.getElapsedCpuTime) geteilt durch die vergangene Echtzeit und die Anzahl logischer Prozessoren, in Prozent der gesamten logischen CPU-Kapazität. Es ist ausdrücklich keine Messung der gesamten Systemauslastung. Aktualisierung einmal pro Sekunde, ausschließlich bei sichtbarer Startseite und aktiver App. Min und Max beziehen sich auf die gültigen Messungen während der Lebensdauer des Statusfensters; Hintergrundintervalle werden nicht einbezogen. Der erste Wert erscheint nach einer Sekunde. Min/aktuell/Max stehen auf einer festen Skala von 0 bis 100 Prozent und haben identisch große rechteckige Marker (blau/orange/blau). Bei gleichen Werten überlagern sich die Marker; die drei Zahlen bleiben separat lesbar.
 
 App-Kennung, privater Signaturschlüssel und Datenformat bleiben unverändert.
+
+## Notizen ab 0.5.0
+Einzelne Notizen mit Titel, Text und Dateianhängen. Blauer Haken im Kreis oben rechts speichert;
+das rote X schließt den Editor. Ungespeicherte Änderungen erfordern eine Verwerfen-Entscheidung.
+Beim ersten Anhang zunächst „Ablage einrichten“ wählen: Android fragt nach einem beschreibbaren
+Ordner auf dem Handy (z. B. Dokumente). Darin legt FYLO `FYLO/Dateien/<Notiz-ID>/` an.
+Ist der ausgewählte Ordner bereits FYLO, wird nur Dateien ergänzt. Es werden Kopien angelegt;
+Originaldateien bleiben unverändert. Gleiche Dateinamen werden vom Dokumentanbieter aufgelöst.
+Anhänge sind per Antippen mit einer passenden installierten App zu öffnen.
+Beim Verwerfen werden neu importierte Kopien nach Möglichkeit entfernt; gespeicherte Anhänge bleiben erhalten.
+Eine geänderte Ablage betrifft neue Importe, bestehende Anhänge behalten ihren Speicherort.
+
+Migration: Der bisherige SharedPreferences-Schlüssel `note` bleibt unverändert als Sicherung.
+Fehlt `notes_v1`, wird sein gesamter Inhalt als „Bisherige Notiz“ angezeigt. Erst beim expliziten
+Speichern schreibt FYLO die Liste mit IDs und Anhängen nach `notes_v1`. Aufgaben bleiben unverändert.
+Ungültiges Notiz-JSON blockiert das Speichern, statt Daten mit einer leeren Liste zu überschreiben.
+Dateien und Berechtigungen bleiben über App-Neustarts erhalten; entfernte Dateien oder entzogene
+Ordnerberechtigungen werden als Fehler gemeldet. Nach Deinstallation müssen vorhandene Kopien
+bei Bedarf neu zugeordnet werden. Die App kann keinen Ordner vor Installation und Auswahl auf dem Handy erstellen.

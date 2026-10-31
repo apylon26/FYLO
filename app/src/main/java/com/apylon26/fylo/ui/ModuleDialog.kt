@@ -11,16 +11,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.apylon26.fylo.feature.notes.NotesPanel
 import com.apylon26.fylo.data.FyloStore
 import com.apylon26.fylo.modules.ModuleId
 import com.apylon26.fylo.modules.ModuleRegistry
 
 @Composable
 fun ModuleDialog(id: ModuleId, store: FyloStore, onDismiss: () -> Unit) {
+    if (id == ModuleId.NOTES) { NotesPanel(store, onDismiss); return }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(Modifier.fillMaxSize().safeDrawingPadding().imePadding(), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                if (id != ModuleId.NOTES) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(ModuleRegistry.find(id).title, style = MaterialTheme.typography.headlineSmall)
                     TextButton(onClick = onDismiss) { Text("Schließen") }
                 }
@@ -40,15 +42,8 @@ fun ModuleDialog(id: ModuleId, store: FyloStore, onDismiss: () -> Unit) {
                             }
                         }
                     }
-                    ModuleId.NOTES -> {
-                        var text by rememberSaveable { mutableStateOf(store.note) }
-                        var saved by rememberSaveable { mutableStateOf(false) }
-                        OutlinedTextField(text, { text = it; saved = false }, label = { Text("Deine Notizen") }, modifier = Modifier.fillMaxWidth().weight(1f))
-                        Button(onClick = { store.saveNote(text); saved = true }) { Text("Speichern") }
-                        if (saved) Text("Gespeichert")
-                        // The explicit unsaved indicator keeps the editor's persistence visible.
-                        if (text != store.note) Text("Ungespeicherte Änderungen", style = MaterialTheme.typography.labelMedium)
-                    }
+                    ModuleId.NOTES -> Unit
+
                 }
             }
         }
