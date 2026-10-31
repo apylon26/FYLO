@@ -11,6 +11,7 @@ import org.json.JSONObject
 import java.util.UUID
 import com.apylon26.fylo.feature.notes.Note
 import com.apylon26.fylo.feature.notes.NoteCodec
+import com.apylon26.fylo.feature.notes.notesAfterDeleting
 
 data class Task(val id: String, val title: String, val done: Boolean)
 
@@ -67,8 +68,15 @@ class FyloStore(context: Context) {
         check(notesError == null) { "Die gespeicherten Notizen konnten nicht gelesen werden." }
         val updated = notes.toMutableList()
         val index = updated.indexOfFirst { it.id == value.id }
-        if (index < 0) updated.add(0, value) else updated[index] = value
+        if (index < 0) updated.add(0, value) else updated[index] = value.copy(createdAt = updated[index].createdAt)
         check(prefs.edit().putString("notes_v1", NoteCodec.encode(updated)).commit()) { "Speichern fehlgeschlagen." }
+        notes.clear()
+        notes.addAll(updated)
+    }
+    fun deleteNote(id: String) {
+        check(notesError == null) { "Die gespeicherten Notizen konnten nicht gelesen werden." }
+        val updated = notesAfterDeleting(notes, id)
+        check(prefs.edit().putString("notes_v1", NoteCodec.encode(updated)).commit()) { "Löschen fehlgeschlagen." }
         notes.clear()
         notes.addAll(updated)
     }

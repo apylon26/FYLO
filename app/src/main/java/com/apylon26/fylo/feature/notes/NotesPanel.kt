@@ -31,6 +31,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.apylon26.fylo.data.FyloStore
 import java.util.UUID
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 @Composable
@@ -39,6 +42,8 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
     val files = remember { NoteFiles(context.applicationContext) }
     var selected by rememberSaveable { mutableStateOf<String?>(null) }
+    var createdAt by rememberSaveable { mutableStateOf<Long?>(null) }
+    var noteToDelete by rememberSaveable { mutableStateOf<String?>(null) }
     var title by rememberSaveable { mutableStateOf("") }
     var text by rememberSaveable { mutableStateOf("") }
     var draftJson by rememberSaveable { mutableStateOf("[]") }
@@ -63,7 +68,7 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
         if (dirty) askDiscard = true else if (module || selected == null) onDismiss() else selected = null
     }
     fun edit(note: Note) {
-        selected = note.id; title = note.title; text = note.text
+        selected = note.id; createdAt = note.createdAt; title = note.title; text = note.text
         draftJson = NoteCodec.encode(listOf(note)); notice = null; error = null
         activeAttachment = null; pendingDeleteJson = "[]"
     }
@@ -108,7 +113,7 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
                 Surface(tonalElevation = 4.dp, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
                     Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
                         NoteAction("✓", "Neue Notiz", !busy && store.notesError == null && !dirty) {
-                            edit(Note(UUID.randomUUID().toString(), "", ""))
+                            edit(Note(UUID.randomUUID().toString(), "", "", createdAt = System.currentTimeMillis()))
                         }
                         NoteAction("+", "Datei hinzufügen", !busy && selected != null) {
                             if (store.filesTree == null) folderPicker.launch(null) else filePicker.launch(arrayOf("*/*"))
@@ -127,7 +132,7 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
                         scope.launch {
                             busy = true
                             try {
-                                store.saveNote(Note(checkNotNull(selected), title.trim().ifBlank { "Ohne Titel" }, text, attachments))
+                                store.saveNote(Note(checkNotNull(selected), title.trim().ifBlank { "Ohne Titel" }, text, attachments, createdAt))
                                 title = title.trim().ifBlank { "Ohne Titel" }
                                 val failed = pendingDeletes.filterNot { files.delete(it) }
                                 pendingDeleteJson = NoteCodec.encode(listOf(Note(checkNotNull(selected), "", "", failed)))
@@ -144,10 +149,19 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
                     LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(store.notes, key = { it.id }) { note ->
                             OutlinedCard(onClick = { edit(note) }, modifier = Modifier.fillMaxWidth()) {
-                                Column(Modifier.padding(16.dp)) {
-                                    Text(note.title, style = MaterialTheme.typography.titleMedium)
-                                    Text(note.text.take(100), maxLines = 2)
-                                    Text("${note.attachments.size} Anhänge", style = MaterialTheme.typography.labelSmall)
+                                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(note.title, style = MaterialTheme.typography.titleMedium)
+                                        Text(note.text.take(100), maxLines = 2)
+                                        Text(note.createdAt?.let {
+                                            "Erstellt: " + SimpleDateFormat("dd.MM.yyyy · HH:mm", Locale.GERMANY).format(Date(it))
+                                        } ?: "Erstellungsdatum unbekannt", style = MaterialTheme.typography.bodySmall)
+                                        Text("${note.attachments.size} Anhänge", style = MaterialTheme.typography.labelSmall)
+                                    }
+                                    NoteAction("X", "Notiz löschen", !busy && store.notesError == null) {
+                                        noteToDelete = note.id
+                                    }
                                 }
                             }
                         }
@@ -187,6 +201,20 @@ fun NotesPanel(store: FyloStore, onDismiss: () -> Unit) {
                 notice?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
             }
+        }
+        noteToDelete?.let { id ->
+            val deleting = store.notes.firstOrNull { it.id == id }
+            AlertDialog(onDismissRequest = { noteToDelete = null },
+                title = { Text("Notiz löschen?") },
+                text = { Text("„${deleting?.title.orEmpty()}“ wird endgültig gelöscht. Angehängte Dateien bleiben in der Ablage erhalten.") },
+                confirmButton = { TextButton(enabled = !busy, onClick = {
+                    try {
+                        store.deleteNote(id)
+                        notice = "Notiz gelöscht."
+                    } catch (_: Exception) { error = "Löschen fehlgeschlagen. Bitte erneut versuchen." }
+                    noteToDelete = null
+                }) { Text("Löschen") } },
+                dismissButton = { TextButton(onClick = { noteToDelete = null }) { Text("Abbrechen") } })
         }
         if (deleteConfirmation) AlertDialog(onDismissRequest = { deleteConfirmation = false },
             title = { Text("Dateikopie löschen?") },

@@ -104,3 +104,13 @@ Entfernen ändert ausschließlich die Zuordnung. Löschen erfordert eine Bestät
 und wird erst nach erfolgreichem Speichern an der FYLO-Kopie ausgeführt.
 Fehlgeschlagene Löschungen werden gemeldet und können durch erneutes Speichern wiederholt werden.
 Die ursprüngliche importierte Quelldatei bleibt erhalten. Datenformat, App-ID und Signatur bleiben gleich.
+
+## Notizübersicht ab 0.7.0
+Jede Notiz zeigt ihr Erstellungsdatum mit Uhrzeit in der lokalen Gerätezeitzone.
+Neue Notizen erhalten den Zeitpunkt beim Anlegen; beim Bearbeiten bleibt er erhalten.
+Bestehende Notizen ohne Zeitstempel zeigen „Erstellungsdatum unbekannt“; es wird kein Datum erfunden.
+Das optionale Feld `createdAt` ergänzt das bestehende JSON unter `notes_v1` ohne Änderung von IDs,
+Texten oder Anhängen. Der alte Sicherungsschlüssel bleibt erhalten.
+Neben jeder Notiz steht ein blaues rundes X mit orangem Zeichen. Nach Bestätigung wird nur
+diese Notiz dauerhaft entfernt. Dateikopien in FYLO/Dateien bleiben erhalten.
+Die Liste wird erst nach erfolgreichem Speichern aktualisiert; Lesefehler blockieren Löschungen.
