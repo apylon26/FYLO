@@ -63,6 +63,7 @@ fun FyloApp(visible: Boolean, refresh: Int) {
     val mutations = remember { Mutex() }
     var model by remember { mutableStateOf<ScreenState?>(null) }
     var screenError by remember { mutableStateOf<String?>(null) }
+    var statusReport by rememberSaveable { mutableStateOf("FYLO wird gestartet …") }
     var modules by remember { mutableStateOf(emptyList<InstalledModule>()) }
     var reload by remember { mutableIntStateOf(0) }
     var settings by rememberSaveable { mutableStateOf(false) }
@@ -78,6 +79,7 @@ fun FyloApp(visible: Boolean, refresh: Int) {
                 try {
                     model = withContext(Dispatchers.IO) { operation() }
                     screenError = null
+                    statusReport = "Änderungen der Systemsteuerung gespeichert."
                 } catch (e: Exception) {
                     if (e is kotlinx.coroutines.CancellationException) throw e
                     screenError = e.message ?: "Die Screen-Daten konnten nicht gespeichert werden."
@@ -89,10 +91,14 @@ fun FyloApp(visible: Boolean, refresh: Int) {
         try {
             context.startActivity(Intent(ModulePolicy.ACTION).setComponent(module.component)
                 .putExtra("com.apylon26.fylo.SCREEN_SIGNATURE", signature))
+            statusReport = "${module.title} wurde gestartet."
         } catch (_: Exception) { screenError = "Dieses Modul ist nicht mehr verfügbar."; reload++ }
     }
     LaunchedEffect(Unit) {
-        try { model = withContext(Dispatchers.IO) { repository.read() } }
+        try {
+            model = withContext(Dispatchers.IO) { repository.read() }
+            statusReport = "FYLO ist bereit."
+        }
         catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
             screenError = "Screen-Daten nicht lesbar. Sie werden nicht überschrieben."
@@ -148,29 +154,16 @@ fun FyloApp(visible: Boolean, refresh: Int) {
                             }
                         }
                     }
-                    screenError?.let { Text(it, color = Orange, fontSize = 12.sp) }
+                    StatusReportsWindow(screenError ?: statusReport, screenError != null)
+                    Spacer(Modifier.height(12.dp))
                     if (screens.isEmpty()) {
-                        Text(if (model == null) "Screens werden geladen …" else "Noch kein Screen. Bitte in der Systemsteuerung anlegen.", color = Pale)
+                        Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Text(if (model == null) "Screens werden geladen …" else "Noch kein Screen. Bitte in der Systemsteuerung anlegen.", color = Pale)
+                        }
                     } else HorizontalPager(state = pager, key = { screens[it].signature }, modifier = Modifier.weight(1f).fillMaxWidth()) { index ->
                         val screen = screens[index]
-                        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                            Surface(shape = RoundedCornerShape(20.dp), color = Color(0xFF102A50), modifier = Modifier.fillMaxWidth()) {
-                                Column(Modifier.padding(18.dp).heightIn(min = 64.dp)) {
-                                    Text("Status · ${screen.name}", color = Orange, fontSize = 17.sp)
-                                    Spacer(Modifier.height(8.dp))
-                                    Text("Bereit für spätere Anwendungen und Funktionen.", color = Pale, fontSize = 14.sp)
-                                }
-                            }
-                            Spacer(Modifier.height(12.dp))
-                            val assigned = model?.assignments.orEmpty().filterValues { it == screen.signature }
-                            assigned.keys.forEach { id ->
-                                val module = modules.firstOrNull { it.component.flattenToString() == id }
-                                OutlinedButton(enabled = module != null, modifier = Modifier.fillMaxWidth(), onClick = {
-                                    if (module != null) launchModule(module, screen.signature)
-                                }) { Text(module?.title ?: "Modul nicht verfügbar") }
-                            }
-                            Spacer(Modifier.height(20.dp))
-                        }
+                        val assigned = model?.assignments.orEmpty().filterValues { it == screen.signature }.keys
+                        ModuleScreen(screen, assigned, modules, refresh) { module -> launchModule(module, screen.signature) }
                     }
                 }
                 if (settings) SettingsPopup(modules, { reload++ }, model, repository, ::change, screenError, onClose = { settings = false })
@@ -293,7 +286,7 @@ private fun SettingsPopup(modules: List<InstalledModule>, onReload: () -> Unit, 
                 Text("KI-Assistent", color = Orange, fontSize = 19.sp)
                 AssistantSelection(modules, model, repository, change)
                 Spacer(Modifier.height(16.dp))
-                Text("FYLO 0.2.0 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
+                Text("FYLO 0.2.1 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
             }
         }
     }

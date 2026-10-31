@@ -1,6 +1,6 @@
-# FYLO 0.2.0 – Assistenz-Kern
+# FYLO 0.2.1 – Assistenz-Kern
 
-Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 12; applicationId und Signaturschlüssel bleiben erhalten.
+Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 13; applicationId und Signaturschlüssel bleiben erhalten.
 
 ## Startbildschirm
 
@@ -11,7 +11,8 @@ Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 12; 
 - Benannte Screens mit unlabeled Kacheln oberhalb des Statusfensters und horizontalem Wischen.
 - Die Systemsteuerung legt Screens an, zeigt Bezeichnung und automatisch vergebene vierstellige Signatur und löscht nur Screens ohne Modulzuordnungen.
 - Module lassen sich über ihre Screen-Zuordnung auf einen Screen setzen oder davon entfernen. Nicht verfügbare Module behalten ihre Zuordnung, bis sie ausdrücklich entfernt wird.
-- Statusfenster unterhalb der Uhr für spätere Anwendungen und Funktionen.
+- Festes Statusfenster direkt unter den Screen-Kacheln. Es zeigt Bereitschaft, gespeicherte Änderungen, Modulstarts und Fehler. Noch kein externes Modulmeldungsprotokoll und kein Berichtsarchiv.
+- Der wechselbare Modulbereich liegt vollständig unterhalb des Statusfensters und erhält den restlichen verfügbaren Bildschirmplatz. Module erscheinen als Icon-Kacheln mit Modulbezeichnung; bei vielen Modulen scrollt nur das Icon-Raster vertikal. Das Statusfenster bleibt beim Wischen und Scrollen stehen.
 - Zahnrad oben rechts öffnet das Einstellungen-Popup.
 
 Die CPU-Funktion ist vollständig entfernt: keine Messungen, kein Diagramm, keine Peak-Werte und kein CPU-Abschnitt in den Einstellungen. Uhr und Batterieanzeige aktualisieren sich im Vordergrund; im Hintergrund pausieren die Abfragen.
