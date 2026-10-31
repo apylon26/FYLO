@@ -158,7 +158,7 @@ private fun ModulesScreen(store: FyloStore) {
 
 @Composable
 private fun SystemScreen() {
-    InfoCard("FYLO 0.3.0", "Eigenständige Android-App mit vier wischbaren Seiten und einem gemeinsamen Modulkern.")
+    InfoCard("FYLO 0.3.1", "Eigenständige Android-App mit vier wischbaren Seiten und einem gemeinsamen Modulkern.")
     InfoCard("Deine Daten", "Aufgaben, Notizen und Moduleinstellungen bleiben lokal im privaten App-Bereich. Bei einer Deinstallation können sie verloren gehen.")
     InfoCard("Verbindungen", "Kein KI-Anbieter verbunden. Keine Anmeldung und keine API-Schlüssel erforderlich.")
     Text("FYLO ist eine eigene Haupt-App. Der Android-Startbildschirm und andere Handy-Apps bleiben separat verfügbar.", style = MaterialTheme.typography.bodyMedium)

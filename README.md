@@ -59,3 +59,9 @@ und APK auf dem Handy testen. Zugang und tatsächliche Schreibmöglichkeiten sin
 Auf der Startseite kreisen vier Satelliten um eine blau-orange Kugel. Einfache Canvas-Verläufe statt aufwendiger Echtzeit-3D-Effekte; maximal etwa 30 Aktualisierungen pro Sekunde. Gedrückt halten beschleunigt die Bewegung und verstärkt das Licht. Beim Wischen, geöffnetem Modul, außerhalb des sichtbaren Bereichs sowie bei pausierter App oder ausgeschaltetem Display stoppt die Animation. Die Android-Einstellung zum Deaktivieren von Animationen wird berücksichtigt. Aufgaben, Notizen und Moduleinstellungen bleiben unverändert. Der Entwurf ist nativ nachgebildet; Kalender, Dateien und freie KI-Gespräche werden damit nicht ergänzt.
 
 Der konkrete Akkuverbrauch wurde noch nicht auf einem Gerät gemessen.
+
+## Installationskorrektur 0.3.1
+
+Die bisherigen CI-Läufe erzeugten unterschiedliche temporäre Debug-Schlüssel. Ein Update der alten App ist ohne deren ursprünglichen privaten Schlüssel nicht möglich. FYLO Neu (com.apylon26.fylo.app) wird deshalb parallel installiert; die alte App und ihre Daten bleiben erhalten. Es gibt keine automatische Datenübernahme.
+
+CI erzeugt nun ausdrücklich nicht installierbare, unsignierte Entwicklungs-APKs. Vor der Weitergabe werden diese mit tools/sign_apk.py und dem privat gesicherten festen Schlüssel signiert und geprüft. Der private Schlüssel liegt ausschließlich im Backup FYLO-Android-Signierung.zip außerhalb dieses Repositorys. Der SHA-256-Fingerabdruck des Zertifikats ist im Skript festgehalten. Keine zufälligen Ersatzschlüssel verwenden. Der Installationsdialog von Play Protect für unbekannte Entwickler kann weiterhin erscheinen.

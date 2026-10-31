@@ -7,12 +7,14 @@ android {
     namespace = "com.apylon26.fylo"
     compileSdk = 35
     defaultConfig {
-        applicationId = "com.apylon26.fylo"
+        applicationId = "com.apylon26.fylo.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.3.1"
     }
+    // Signing is performed after CI with the privately backed-up, persistent key.
+    buildTypes { getByName("debug") { signingConfig = null } }
     buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
