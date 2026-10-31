@@ -1,7 +1,7 @@
 # FYLO development instructions
 
 FYLO is being rebuilt from zero for Andreas. User-facing text is German.
-The current baseline is 0.0.0 and deliberately contains no runnable application or build workflow. Do not claim old modules are still implemented.
+The current rebuilt version is 0.1.0. It contains an analog clock, battery and CPU monitoring, a settings popup and external APK module installation/discovery. No AI model or previous modules are bundled. Do not claim planned capabilities are implemented.
 Use Kotlin and Jetpack Compose when rebuilding the native Android app. Agree new features from the ongoing user instructions; do not automatically restore the previous UI or modules.
 Use the agreed icon style: classic blue circle, orange symbol, subtle 3D effect, transparent background, consistent proportions and lighting.
 Never commit credentials or signing keys. Keep future build dependencies pinned.
@@ -18,3 +18,4 @@ The last installed version used applicationId com.apylon26.fylo.app and launcher
 ## Reset scope
 
 The user authorized starting over including all old functions and data. The repository reset does not erase installed Android data or shared FYLO folders. Do not claim device data has been erased without actual device evidence. Preserve the old repository snapshot in backup/v0.7.0-before-reset-2026-10-31.
+

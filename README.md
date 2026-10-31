@@ -1,19 +1,30 @@
-# FYLO – Neustart
+# FYLO 0.1.0 – neuer Assistenz-Kern
 
-Projektstand: 0.0.0. Am 31.10.2026 auf Wunsch von Andreas vollständig auf eine leere Ausgangsbasis zurückgesetzt.
+Native Android-Basis in Kotlin und Jetpack Compose. Neu aufgebaut nach dem vollständigen Projektreset; keine alten Module oder Daten werden importiert. applicationId und Signaturschlüssel bleiben für kompatible Installation erhalten; die Versionsnummer startet neu bei 0.1.0, der technische versionCode steigt auf 9.
 
-Der aktive Projektstand enthält keine App, Module, alten Oberflächen, Beispieldaten oder Build-Workflows. Der neue Aufbau und seine Funktionen werden schrittweise neu festgelegt. Es wurde keine neue APK erstellt.
+## Startbildschirm
 
-## Designbasis
+- Analoge Uhr mit Stunden-, Minuten- und orangefarbenem Sekundenzeiger, jede Sekunde an die aktuelle Systemzeit angepasst.
+- Akkustand und Ladezustand aus Androids Batterieinformation.
+- CPU-Anzeige mit Minimum, aktuellem Wert, Maximum und Balken mit Extremwert-Markierungen. Gültige Messwerte aktualisieren sich jede Sekunde, während FYLO sichtbar ist. Die Uhr und das Sampling pausieren im Hintergrund.
+- Blaues rundes Zahnrad mit orangefarbenem Symbol oben rechts öffnet ein scrollbar angelegtes Einstellungen-Popup.
 
-Einheitliche Icons: klassischer blauer Kreis, orangefarbenes Symbol, dezenter 3D-Effekt und transparenter Hintergrund. Form, Proportionen und Lichtwirkung bleiben einheitlich.
+Die CPU-Quelle ist beschriftet: `CPU · Gerät`, wenn Android das Lesen von /proc/stat erlaubt; sonst `CPU · FYLO`, gemessen über Process.getElapsedCpuTime und normiert auf alle verfügbaren Prozessorkerne. Kein erfundener Gerätewert. Minimum/Maximum gelten für den laufenden App-Prozess und dieselbe Quelle. Ungültige Messungen erscheinen als Strich. Bei einem Quellenwechsel werden die Extremwerte zurückgesetzt.
 
-## Bisheriger Stand
+## Module und KI
 
-Version 0.7.0 ist im Sicherungsbranch `backup/v0.7.0-before-reset-2026-10-31` erhalten. Der Reset ersetzt die aktiven Dateien; die Git-Historie bleibt als Sicherung erhalten.
+Separate FYLO-Modul-APKs lassen sich über das Einstellungen-Popup mit Androids Installer nachinstallieren und anschließend öffnen. Noch keine Module vorinstalliert. Die [Modulschnittstelle](docs/MODULES.md) ist dokumentiert. Das ist der Assistenz-Kern; ein KI-Modul/Sprachmodell ist noch nicht enthalten. Kein API-Schlüssel und kein kostenpflichtiger Dienst vorkonfiguriert.
 
-## Vollständiger Reset auf dem Android-Gerät
+## Bauen und prüfen
 
-Ein Repository-Reset löscht keine Daten auf dem Handy. In Android für jede vorhandene FYLO-Installation (FYLO und gegebenenfalls FYLO Neu) die App-Info öffnen, unter Speicher die Daten löschen und danach die App deinstallieren. Selbst angelegte FYLO-Ordner einschließlich `FYLO/Dateien` im Dateimanager separat löschen, sofern vorhanden. Vorhandene heruntergeladene FYLO-APKs bei Bedarf ebenfalls löschen. Beim späteren Neuaufbau keine alten App-Daten wiederherstellen.
+JDK 17, Gradle 8.9, Android SDK 35:
 
-Die Dateien auf dem Handy wurden durch diesen Projekt-Reset nicht gelöscht.
+```sh
+gradle --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+```
+
+Der GitHub-Workflow führt diese Checks aus und erzeugt ein **unsigniertes, nicht direkt installierbares** internes Build-Artefakt. Installierbare Entwicklungs-APKs werden ausschließlich separat mit dem bestehenden privaten Schlüssel via tools/sign_apk.py signiert und geprüft. Keine Schlüssel im Repository.
+
+## Gerätezustand
+
+Ein Code-Neustart löscht keine Daten auf dem Handy. Für den gewünschten vollständigen Neustart die Daten von FYLO/FYLO Neu in Androids App-Info löschen und gegebenenfalls gemeinsame FYLO-Ordner im Dateimanager entfernen. Diese Version liest die alten Daten nicht und führt keine versteckte Löschung gemeinsamer Dateien durch. Der alte Projektstand bleibt in backup/v0.7.0-before-reset-2026-10-31 erhalten.
