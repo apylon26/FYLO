@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -66,7 +67,7 @@ fun FyloApp(visible: Boolean, refresh: Int) {
         Surface(color = Navy) {
             BoxWithConstraints(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF10396C), Navy)))
                 .windowInsetsPadding(WindowInsets.safeDrawing)) {
-                val clockSize = minOf(maxWidth - 48.dp, maxHeight * 0.44f, 360.dp) / 2
+                val clockSize = minOf(maxWidth - 48.dp, maxHeight * 0.44f, 360.dp) / 2 * 0.75f
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     Row(Modifier.fillMaxWidth().height(72.dp), horizontalArrangement = Arrangement.End,
@@ -74,7 +75,7 @@ fun FyloApp(visible: Boolean, refresh: Int) {
                         RoundButton("⚙", "Einstellungen öffnen") { settings = true }
                     }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        AnalogClock(now, Modifier.size(clockSize))
+                        AnalogClock(now, Modifier.size(clockSize).alpha(0.60f))
                         Spacer(Modifier.width(20.dp))
                         Column(Modifier.weight(1f)) {
                             Text(now.format(DateTimeFormatter.ofPattern("EEEE", Locale.GERMAN)), color = Pale, fontSize = 16.sp)
@@ -92,8 +93,6 @@ fun FyloApp(visible: Boolean, refresh: Int) {
                             Text("Bereit für spätere Anwendungen und Funktionen.", color = Pale, fontSize = 14.sp)
                         }
                     }
-                    Spacer(Modifier.height(18.dp))
-                    CpuRadarCard(reading, visible)
                     Spacer(Modifier.height(28.dp))
                 }
                 if (settings) SettingsPopup(refresh, onClose = { settings = false })
@@ -199,11 +198,8 @@ private fun SettingsPopup(refresh: Int, onClose: () -> Unit) {
                 HorizontalDivider(Modifier.padding(vertical = 20.dp))
                 Text("KI-Assistent", color = Orange, fontSize = 19.sp)
                 Text("Noch kein KI-Modul installiert. Ein lokales Sprachmodell oder ein KI-Dienst kann als eigenes Modul ergänzt werden.", color = Pale)
-                HorizontalDivider(Modifier.padding(vertical = 20.dp))
-                Text("CPU-Anzeige", color = Orange, fontSize = 19.sp)
-                Text("Die Messung aktualisiert sich jede Sekunde, solange FYLO sichtbar ist. Minimum und Maximum gelten seit dem App-Start. Wenn Android die Geräte-CPU sperrt, wird die CPU-Nutzung von FYLO angezeigt, bezogen auf alle verfügbaren Kerne. Die Quelle steht über dem Diagramm. Das Spinnennetz hat drei Achsen: Minimum, aktuell und Maximum. Die Skala passt sich an den Maximum-Peak an. Der umlaufende orange Punkt zeigt die aktuelle Auslastung durch seinen Abstand zur Mitte; seine Rotation ist eine Animation, keine zusätzliche Messung.", color = Pale)
                 Spacer(Modifier.height(16.dp))
-                Text("FYLO 0.1.1 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
+                Text("FYLO 0.1.2 · persönliches Assistenz-Hauptprogramm", color = Pale, fontSize = 12.sp)
             }
         }
     }

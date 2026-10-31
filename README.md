@@ -1,16 +1,16 @@
-# FYLO 0.1.1 – neuer Assistenz-Kern
+# FYLO 0.1.2 – Assistenz-Kern
 
-Native Android-Basis in Kotlin und Jetpack Compose. Neu aufgebaut nach dem vollständigen Projektreset; keine alten Module oder Daten werden importiert. applicationId und Signaturschlüssel bleiben für kompatible Installation erhalten; die Versionsnummer startet neu bei 0.1.0; dieses Update ist 0.1.1 mit technischem versionCode 10.
+Native Android-Basis in Kotlin und Jetpack Compose. Technischer versionCode 11; applicationId und Signaturschlüssel bleiben erhalten.
 
 ## Startbildschirm
 
-- Analoge Uhr mit Stunden-, Minuten- und orangefarbenem Sekundenzeiger, jede Sekunde an die aktuelle Systemzeit angepasst.
-- Uhr mit halbem Durchmesser gegenüber 0.1.0. Datum, Akkustand und Ladezustand stehen rechts neben der Uhr.
-- Statusfenster unterhalb der Uhr als ausdrücklich gekennzeichneter Platzhalter für spätere Anwendungen und Funktionen.
-- CPU-Spinnennetz mit drei Achsen (Minimum, aktuell, Maximum), automatisch skalierter Messfläche, Min-Peak und Max-Peak. Der orange Indikator läuft in acht Sekunden innerhalb des Dreiecks um; seine Entfernung zur Mitte richtet sich nach der aktuellen Auslastung. Die Rotation ist eine Darstellungsanimation und kein weiterer Messwert. Bei 0 % bleibt er in der Mitte. Die Messfläche und Zahlen zeigen die echten Messwerte. Gültige Messwerte aktualisieren sich jede Sekunde, während FYLO sichtbar ist. Die Uhr und das Sampling pausieren im Hintergrund.
-- Blaues rundes Zahnrad mit orangefarbenem Symbol oben rechts öffnet ein scrollbar angelegtes Einstellungen-Popup.
+- Analoge Uhr mit Sekundenzeiger, gegenüber 0.1.1 um weitere 25 % im Durchmesser verkleinert.
+- Die gesamte Uhr hat 60 % Deckkraft (40 % transparent).
+- Datum, Akkustand und Ladezustand rechts neben der Uhr.
+- Statusfenster unterhalb der Uhr für spätere Anwendungen und Funktionen.
+- Zahnrad oben rechts öffnet das Einstellungen-Popup.
 
-Die CPU-Quelle ist beschriftet: `CPU · Gerät`, wenn Android das Lesen von /proc/stat erlaubt; sonst `CPU · FYLO`, gemessen über Process.getElapsedCpuTime und normiert auf alle verfügbaren Prozessorkerne. Kein erfundener Gerätewert. Minimum/Maximum gelten für den laufenden App-Prozess und dieselbe Quelle. Ungültige Messungen erscheinen als Strich. Bei einem Quellenwechsel werden die Extremwerte zurückgesetzt.
+Die CPU-Funktion ist vollständig entfernt: keine Messungen, kein Diagramm, keine Peak-Werte und kein CPU-Abschnitt in den Einstellungen. Uhr und Batterieanzeige aktualisieren sich im Vordergrund; im Hintergrund pausieren die Abfragen.
 
 ## Module und KI
 
